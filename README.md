@@ -1,7 +1,7 @@
 # Kata Bloom Filter
 
-http://codekata.com/kata/kata05-bloom-filters/
-https://en.wikipedia.org/wiki/Bloom_filter
+* http://codekata.com/kata/kata05-bloom-filters/
+* https://en.wikipedia.org/wiki/Bloom_filter
 
 ## Step 1
 
