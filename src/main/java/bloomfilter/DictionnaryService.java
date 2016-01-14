@@ -1,5 +1,5 @@
 package bloomfilter;
-import com.google.api.client.util.Charsets;
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class DictionnaryService {
         Path path = Paths.get(Resources.getResource(DICO).getPath());
 
         try (Stream<String> lines = Files.lines(path, Charsets.ISO_8859_1)) {
-            return lines.collect(toList());
+            return lines.limit(500).collect(toList());
         } catch (IOException ignored) {
             LOG.warn("Cannot read commune file : {}", ignored);
         }

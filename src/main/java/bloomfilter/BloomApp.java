@@ -1,17 +1,10 @@
 package bloomfilter;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 
 public class BloomApp {
@@ -21,16 +14,14 @@ public class BloomApp {
     private DictionnaryService dictionnaryService;
     private int nSize = 8;
     private int kSize = 1;
-    byte[] bloomFilter;
+    boolean[] bloomFilter;
 
     public static void main(String... args) throws Exception {
 
-        Injector injector = Guice.createInjector(new JobModule());
-        //Client client = new RandomProxyClientProvider(new ProxyListProvider("").get()).get();
         DictionnaryService dictionnaryService = new DictionnaryService();
 
         try {
-            BloomApp bloomApp = new BloomApp(dictionnaryService, 200000, 1);
+            BloomApp bloomApp = new BloomApp(dictionnaryService, 500000, 5);
             bloomApp.runner();
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -45,7 +36,7 @@ public class BloomApp {
         this.nSize = nSize;
         this.kSize = kSize;
         this.dictionnaryService = dictionnaryService;
-        bloomFilter = new byte[nSize];
+        bloomFilter = new boolean[nSize];
     }
 
     public void runner() throws Exception {
@@ -57,30 +48,32 @@ public class BloomApp {
                         }
                 );
 
-        IntStream.range(0,nSize)
+        IntStream.range(0, nSize)
                 .peek(i -> {
-                    LOG.info("bloomFilter[{}] est {}",i,bloomFilter[i]);
+                    //LOG.info("bloomFilter[{}] est {}", i, bloomFilter[i]);
                 }).count();
-
-
     }
 
-    public List<Integer> computeBloomKeys(String word) {
-        return IntStream.range(0,kSize)
-                .map(i -> {
-                    return BloomHash.getHahWordForRange(nSize, kSize,  word)
+    public int[] computeBloomKeys(String word) {
+        return IntStream.range(0, kSize)
+                .map(kIndice -> {
+                    return BloomHash.getHahWordForRange(nSize, kIndice, word);
                 })
-                .collect(toList());
+                .toArray();
     }
 
-    public void SetBloomKeys(List<Integer> keys) {
-        keys.stream().forEach(key -> bloomFilter[key] = 1);
+    public void SetBloomKeys(int[] keys) {
+        for (int key : keys) {
+            bloomFilter[key] = true;
+        }
     }
 
     public boolean isPresent(String word) {
-        computeBloomKeys(word).stream()
-                .map(indice -> bloomFilter[indice])
-                .
+        for (int key : computeBloomKeys(word)) {
+            if (bloomFilter[key] == false)
+            return false;
+        }
+        return true;
     }
 
 }
