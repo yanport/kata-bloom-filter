@@ -25,21 +25,6 @@ public class BloomAppTest {
         DictionnaryService dictionnaryService = new DictionnaryService();
 
         BloomApp bloomApp = new BloomApp(dictionnaryService, 100000, 5);
-
-        int[] res = bloomApp.computeBloomKeys("john");
-        LOG.info("keyjohn {}", res);
-        res = bloomApp.computeBloomKeys("john");
-        LOG.info("keyjohn {}", res);
-        bloomApp.SetBloomKeys(res);
-        assertThat(bloomApp.isPresent("john")).isEqualTo(true);
-
-        LOG.info("hash {}", Hashing.murmur3_128().newHasher().putString("abc", StandardCharsets.UTF_8).hash());
-        LOG.info("hash {}", Hashing.murmur3_128().newHasher().putString("agbc", StandardCharsets.UTF_8).hash());
-        LOG.info("hash {}", Hashing.murmur3_128().newHasher().putString("agbc", StandardCharsets.UTF_8).hash());
-
-
-
-        //assertThat(bloomApp.computeBloomKeys("john")).isEqualTo(false);
         bloomApp.runner();
 
         assertThat(bloomApp.isPresent("john")).isEqualTo(true);
