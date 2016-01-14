@@ -1,36 +1,36 @@
 package com.yanport.kata;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class BloomFilter {
 
-    private MessageDigest md5;
-    private int max;
-    private boolean[] storage;
+    private final int max;
+    public List<HashAlgorithm> hashFunctions;
+    public Byte[] storage;
 
-    public BloomFilter(int max) {
-        this.max = max;
-        this.storage = new boolean[max+1];
-
-        try {
-            this.md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+    public BloomFilter(int powerOf2, List<HashAlgorithm> hashFunctions) {
+        this.hashFunctions = hashFunctions;
+        this.max = 1 << powerOf2;
+        this.storage = new Byte[1 << powerOf2];
     }
 
     public void save(String word) {
-        storage[hash(word)] = true;
+        hashFunctions.stream()
+                .map(f -> f.hash(word) & (max - 1))
+                .forEach(hash -> storage[hash] = 1);
     }
 
     public boolean isPresent(String word) {
-        return storage[hash(word)];
+        return hashFunctions.stream()
+                .map(f -> f.hash(word) & (max - 1))
+                .allMatch(hash -> storage[hash & (max - 1)] != null);
     }
 
-    public int hash(String word) {
-        byte[] bytes = md5.digest(word.getBytes());
-        return ((bytes[0] & 0xFF) << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF) & max;
-    }
 
+    @Override
+    public String toString() {
+        return "BloomFilter: " + Arrays.toString(storage);
+    }
 }
